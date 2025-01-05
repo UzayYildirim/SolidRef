@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Reference Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background-color: #fff5f0;
+            color: #1a1f36;
+            margin: 0;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        .container {
+            max-width: 100%;
+            width: 100%;
+            padding: 1rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0;
+        }
+        
+        .progress {
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1100;
+            margin: 0;
+            border-radius: 0;
+            background-color: #e9ecef;
+            height: 6px;
+            overflow: hidden;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 80px);
+            padding: 1.5rem 2rem 1rem 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 20px rgba(255, 87, 34, 0.08);
+            margin-top: 1rem;
+        }
+        
+        .step-description {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .progress-bar {
+            transition: width 0.6s ease;
+            background-color: #2196F3;
+            height: 100%;
+        }
+        
+        .form-control, .form-select {
+            font-size: 1.1rem;
+            padding: 0.6rem 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #ff5722;
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 0;
+        }
+        
+        .step-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.75rem;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .step-number::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: #e9ecef;
+            right: -100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .step-number:last-child::after {
+            display: none;
+        }
+        
+        .step-number.active {
+            background-color: #ff5722;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step-title {
+            font-size: 1.75rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #ff5722;
+        }
+        
+        .form-label {
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            color: #444;
+        }
+        
+        .form-icon {
+            color: #6c757d;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        
+        .navigation-buttons {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin-top: auto;
+            padding: 0.75rem;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #ff5722;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #f4511e;
+            transform: translateY(-1px);
+        }
+        
+        #referenceOutput {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            white-space: pre-line;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .step {
+                padding: 1rem 1rem 5rem 1rem;
+                min-height: 85vh;
+                border-radius: 15px;
+            }
+            
+            .navigation-buttons .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+                padding: 0.4rem 0.75rem;
+                font-size: 0.95rem;
+            }
+            
+            .navigation-buttons {
+                padding: 1rem;
+            }
+            
+            .navigation-buttons .btn i {
+                font-size: 0.9rem;
+            }
+            
+            .btn-lg {
+                font-size: 0.95rem;
+                padding: 0.4rem 0.75rem;
+            }
+            
+            .step-title {
+                font-size: 1.4rem;
+            }
+            
+            .form-control, .form-select {
+                padding: 0.5rem 0.75rem;
+            }
+            
+            /* Fix form layout on mobile */
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Ensure checkboxes wrap properly on mobile */
+            .form-label {
+                flex-wrap: wrap;
+            }
+            
+            /* Ensure form checkboxes are properly aligned */
+            .form-check {
+                margin-left: 0.5rem !important;
+            }
+        }
+        
+        .input-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Special styling for phone input */
+        .phone-group .country-select {
+            width: 25% !important;
+            border-radius: 12px 0 0 12px !important;
+            border-right: none;
+        }
+        
+        .phone-group .phone-input {
+            width: 75% !important;
+            border-radius: 0 12px 12px 0 !important;
+            border-left: none;
+            padding-left: 0.75rem;
+        }
+        
+        /* Ensure phone group has proper display */
+        .phone-group {
+            display: flex;
+            flex-wrap: nowrap;
+        }
+        
+        /* Elegant checkbox styling */
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0;
+            margin: 0;
+            margin-left: 1rem !important;
+        }
+        
+        .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            margin: 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .form-check-input:checked {
+            background-color: #ff5722;
+            border-color: #ff5722;
+        }
+        
+        .form-check-input:focus {
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+            border-color: #ff5722;
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+            user-select: none;
+            color: #6c757d;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            margin-right: 0.5rem;
+        }
+        
+        .form-check:hover .form-check-input:not(:checked) {
+            border-color: #ff5722;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Fix inconsistent button spacing */
+        .navigation-buttons .gap-2 {
+            gap: 0.5rem !important;
+        }
+        
+        /* Ensure consistent button hover states */
+        .btn-outline-primary:hover,
+        .btn-outline-secondary:hover {
+            transform: translateY(-1px);
+        }
+        
+        @media (max-width: 768px) {
+            .step-title {
+                font-size: 1.2rem;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+            
+            #result .d-flex.align-items-center {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            #result .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
+            }
+        }
+        
+        .header-actions {
+            gap: 1rem;
+        }
+        
+        .header-actions .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+        
+        @media (max-width: 768px) {
+            .step-title {
+                font-size: 1.2rem;
+                margin-top: 0;
+                margin-bottom: 0;
+                text-align: center;
+                flex: 1;
+            }
+            
+            .header-actions {
+                gap: 0.5rem;
+            }
+            
+            .header-actions .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
+                min-width: auto;
+            }
+        }
+
+        #result {
+            position: relative;
+        }
+
+        #result .navigation-buttons {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            margin: 1rem -2rem -1rem -2rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        #referenceOutput {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+
+        /* Add styles for header lines in the PDF */
+        .header-line {
+            border-color: #ff5722;
+        }
+
+        .floating-header {
+            background: rgba(255, 87, 34, 0.97);
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(255, 87, 34, 0.2);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .tenant-name {
+            font-weight: 600;
+        }
+
+        /* Adjust container padding to account for header */
+        .container.py-4 {
+            padding-top: 1rem !important;
+        }
+
+        @media (max-width: 768px) {
+            .floating-header {
+                font-size: 0.85rem;
+                padding: 0.4rem;
+            }
+        }
+
+        .landing-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #ff8a65, #ff5722);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .landing-content {
+            padding: 2rem;
+            max-width: 100%;
+        }
+
+        .invite-card {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .invite-header {
+            margin-bottom: 2rem;
+        }
+
+        .invite-header i {
+            font-size: 3rem;
+            color: #ff5722;
+            margin-bottom: 1rem;
+        }
+
+        .invite-header h1 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .invite-body h2 {
+            color: #ff5722;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .invite-body p {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .invite-body .subtitle {
+            font-size: 1rem;
+            color: #888;
+            font-weight: 300;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .divider span {
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+
+        .divider i {
+            margin: 0 1rem;
+            color: #ff5722;
+            font-size: 1.2rem;
+        }
+
+        #startButton {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        #startButton:hover {
+            background: #f4511e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.3);
+        }
+
+        #mainContent {
+            transition: opacity 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .invite-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .invite-body h2 {
+                font-size: 2rem;
+            }
+
+            .invite-body p {
+                font-size: 1.1rem;
+            }
+
+            #startButton {
+                padding: 0.8rem 1.5rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        @keyframes shareButtonGlow {
+            0% { 
+                background-color: #ff5722;
+                box-shadow: 0 0 15px rgba(255, 87, 34, 0.4);
+            }
+            50% { 
+                background-color: #2196F3;
+                box-shadow: 0 0 20px rgba(33, 150, 243, 0.4);
+            }
+            100% { 
+                background-color: #ff5722;
+                box-shadow: 0 0 15px rgba(255, 87, 34, 0.4);
+            }
+        }
+
+        #result .navigation-buttons .btn-primary {
+            animation: shareButtonGlow 3s infinite;
+            transition: transform 0.3s ease;
+            border: none;
+        }
+
+        #result .navigation-buttons .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.5);
+        }
+
+        .powered-by {
+            margin-top: 2rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .brand-name {
+            color: #ff5722;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div id="landingPage" class="landing-page">
+        <div class="landing-content">
+            <div class="invite-card">
+                <div class="invite-header">
+                    <i class="bi bi-envelope-paper-heart"></i>
+                    <h1>Reference Letter</h1>
+                </div>
+                <div class="invite-body">
+                    <h2><span class="tenant-name"></span></h2>
+                    <p>has requested you to write a reference letter</p>
+                    <div class="divider">
+                        <span></span>
+                        <i class="bi bi-stars"></i>
+                        <span></span>
+                    </div>
+                    <p class="subtitle">This tool streamlines letter writing to mere moments</p>
+                    <button id="startButton" class="btn btn-lg">
+                        Start Writing
+                        <i class="bi bi-arrow-right-circle ms-2"></i>
+                    </button>
+                </div>
+                <div class="powered-by">
+                    <small>Powered by <span class="brand-name">SolidRef</span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" style="display: none; opacity: 0;">
+        <div class="floating-header">
+            Reference Letter for <span class="tenant-name"><!-- Will be set by JavaScript --></span>
+        </div>
+
+        <div class="container py-4">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 33.33%"></div>
+            </div>
+
+            <!-- Step 1: Landlord Information -->
+            <div class="step" id="step1">
+                <div class="step-indicator">
+                    <div class="step-number active">1</div>
+                    <div class="step-number">2</div>
+                    <div class="step-number">3</div>
+                </div>
+                
+                <h1 class="step-title">Landlord Information</h1>
+                <p class="step-description">Please provide your contact information. This will appear at the top of the reference letter.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-person form-icon"></i>
+                            Your Name
+                        </label>
+                        <input type="text" class="form-control" id="landlordName" placeholder="Your Full Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-geo-alt form-icon"></i>
+                            Your Address
+                            <div class="form-check ms-2">
+                                <input class="form-check-input" type="checkbox" id="skipAddress">
+                                <label class="form-check-label" for="skipAddress">
+                                    Skip my address
+                                </label>
+                            </div>
+                        </label>
+                        <input type="text" class="form-control" id="landlordAddress" placeholder="Your Address">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-telephone form-icon"></i>
+                            Phone Number
+                        </label>
+                        <div class="input-group phone-group">
+                            <select class="form-select country-select" id="countryCode">
+                                <!-- Priority Countries -->
+                                <option value="+1" data-flag="us">+1 🇺🇸</option>
+                                <option value="+1" data-flag="ca">+1 🇨🇦</option>
+                                <option value="+90" data-flag="tr">+90 🇹🇷</option>
+                                <option disabled>──────────</option>
+                                <!-- Rest of the World -->
+                                <option value="+93" data-flag="af">+93 🇦🇫</option>
+                                <option value="+355" data-flag="al">+355 🇦🇱</option>
+                                <option value="+213" data-flag="dz">+213 🇩🇿</option>
+                                <option value="+376" data-flag="ad">+376 🇦🇩</option>
+                                <option value="+244" data-flag="ao">+244 🇦🇴</option>
+                                <option value="+54" data-flag="ar">+54 🇦🇷</option>
+                                <option value="+374" data-flag="am">+374 🇦🇲</option>
+                                <option value="+61" data-flag="au">+61 🇦🇺</option>
+                                <option value="+43" data-flag="at">+43 🇦🇹</option>
+                                <option value="+994" data-flag="az">+994 🇦🇿 Azerbaijan</option>
+                                <option value="+973" data-flag="bh">+973 🇧🇭 Bahrain</option>
+                                <option value="+880" data-flag="bd">+880 🇧🇩 Bangladesh</option>
+                                <option value="+375" data-flag="by">+375 🇧🇾 Belarus</option>
+                                <option value="+32" data-flag="be">+32 🇧🇪 Belgium</option>
+                                <option value="+501" data-flag="bz">+501 🇧🇿 Belize</option>
+                                <option value="+229" data-flag="bj">+229 🇧🇯 Benin</option>
+                                <option value="+975" data-flag="bt">+975 🇧🇹 Bhutan</option>
+                                <option value="+591" data-flag="bo">+591 🇧🇴 Bolivia</option>
+                                <option value="+387" data-flag="ba">+387 🇧🇦 Bosnia</option>
+                                <option value="+55" data-flag="br">+55 🇧🇷 Brazil</option>
+                                <option value="+359" data-flag="bg">+359 🇧🇬 Bulgaria</option>
+                                <option value="+855" data-flag="kh">+855 🇰🇭 Cambodia</option>
+                                <option value="+237" data-flag="cm">+237 🇨🇲 Cameroon</option>
+                                <option value="+56" data-flag="cl">+56 🇱 Chile</option>
+                                <option value="+86" data-flag="cn">+86 🇨🇳 China</option>
+                                <option value="+57" data-flag="co">+57 🇨🇴 Colombia</option>
+                                <option value="+506" data-flag="cr">+506 🇨🇷 Costa Rica</option>
+                                <option value="+385" data-flag="hr">+385 🇭🇷 Croatia</option>
+                                <option value="+53" data-flag="cu">+53 🇨🇺 Cuba</option>
+                                <option value="+357" data-flag="cy">+357 🇨🇾 Cyprus</option>
+                                <option value="+420" data-flag="cz">+420 🇨🇿 Czech Republic</option>
+                                <option value="+45" data-flag="dk">+45 🇩🇰 Denmark</option>
+                                <option value="+20" data-flag="eg">+20 🇪🇬 Egypt</option>
+                                <option value="+372" data-flag="ee">+372 🇪🇪 Estonia</option>
+                                <option value="+251" data-flag="et">+251 🇪🇹 Ethiopia</option>
+                                <option value="+358" data-flag="fi">+358 🇫🇮 Finland</option>
+                                <option value="+33" data-flag="fr">+33 🇫🇷 France</option>
+                                <option value="+995" data-flag="ge">+995 🇬🇪 Georgia</option>
+                                <option value="+49" data-flag="de">+49 🇩🇪 Germany</option>
+                                <option value="+30" data-flag="gr">+30 🇬🇷 Greece</option>
+                                <option value="+299" data-flag="gl">+299 🇬🇱 Greenland</option>
+                                <option value="+502" data-flag="gt">+502 🇬🇹 Guatemala</option>
+                                <option value="+852" data-flag="hk">+852 🇭🇰 Hong Kong</option>
+                                <option value="+36" data-flag="hu">+36 🇭🇺 Hungary</option>
+                                <option value="+354" data-flag="is">+354 🇮🇸 Iceland</option>
+                                <option value="+91" data-flag="in">+91 🇮🇳 India</option>
+                                <option value="+62" data-flag="id">+62 🇮🇩 Indonesia</option>
+                                <option value="+98" data-flag="ir">+98 🇮🇷 Iran</option>
+                                <option value="+964" data-flag="iq">+964 🇮🇶 Iraq</option>
+                                <option value="+353" data-flag="ie">+353 🇮🇪 Ireland</option>
+                                <option value="+972" data-flag="il">+972 🇮🇱 Israel</option>
+                                <option value="+39" data-flag="it">+39 🇮🇹 Italy</option>
+                                <option value="+81" data-flag="jp">+81 🇯🇵 Japan</option>
+                                <option value="+962" data-flag="jo">+962 🇯🇴 Jordan</option>
+                                <option value="+7" data-flag="kz">+7 🇰🇿 Kazakhstan</option>
+                                <option value="+254" data-flag="ke">+254 🇰🇪 Kenya</option>
+                                <option value="+82" data-flag="kr">+82 🇰🇷 South Korea</option>
+                                <option value="+965" data-flag="kw">+965 🇰🇼 Kuwait</option>
+                                <option value="+856" data-flag="la">+856 🇱🇦 Laos</option>
+                                <option value="+371" data-flag="lv">+371 🇱🇻 Latvia</option>
+                                <option value="+961" data-flag="lb">+961 🇱🇧 Lebanon</option>
+                                <option value="+370" data-flag="lt">+370 🇱🇹 Lithuania</option>
+                                <option value="+352" data-flag="lu">+352 🇱🇺 Luxembourg</option>
+                                <option value="+853" data-flag="mo">+853 🇲🇴 Macau</option>
+                                <option value="+389" data-flag="mk">+389 🇲🇰 Macedonia</option>
+                                <option value="+60" data-flag="my">+60 🇲🇾 Malaysia</option>
+                                <option value="+356" data-flag="mt">+356 🇲🇹 Malta</option>
+                                <option value="+52" data-flag="mx">+52 🇲🇽 Mexico</option>
+                                <option value="+373" data-flag="md">+373 🇲🇩 Moldova</option>
+                                <option value="+377" data-flag="mc">+377 🇲🇨 Monaco</option>
+                                <option value="+976" data-flag="mn">+976 🇲🇳 Mongolia</option>
+                                <option value="+212" data-flag="ma">+212 🇲🇦 Morocco</option>
+                                <option value="+95" data-flag="mm">+95 🇲🇲 Myanmar</option>
+                                <option value="+977" data-flag="np">+977 🇳🇵 Nepal</option>
+                                <option value="+31" data-flag="nl">+31 🇳🇱 Netherlands</option>
+                                <option value="+64" data-flag="nz">+64 🇳🇿 New Zealand</option>
+                                <option value="+234" data-flag="ng">+234 🇳🇬 Nigeria</option>
+                                <option value="+47" data-flag="no">+47 🇳🇴 Norway</option>
+                                <option value="+968" data-flag="om">+968 🇴🇲 Oman</option>
+                                <option value="+92" data-flag="pk">+92 🇵🇰 Pakistan</option>
+                                <option value="+970" data-flag="ps">+970 🇵🇸 Palestine</option>
+                                <option value="+507" data-flag="pa">+507 🇵🇦 Panama</option>
+                                <option value="+51" data-flag="pe">+51 🇵🇪 Peru</option>
+                                <option value="+63" data-flag="ph">+63 🇵🇭 Philippines</option>
+                                <option value="+48" data-flag="pl">+48 🇵🇱 Poland</option>
+                                <option value="+351" data-flag="pt">+351 🇵🇹 Portugal</option>
+                                <option value="+974" data-flag="qa">+974 🇶🇦 Qatar</option>
+                                <option value="+40" data-flag="ro">+40 🇷🇴 Romania</option>
+                                <option value="+7" data-flag="ru">+7 🇷🇺 Russia</option>
+                                <option value="+966" data-flag="sa">+966 🇸🇦 Saudi Arabia</option>
+                                <option value="+381" data-flag="rs">+381 🇷🇸 Serbia</option>
+                                <option value="+65" data-flag="sg">+65 🇸🇬 Singapore</option>
+                                <option value="+421" data-flag="sk">+421 🇸🇰 Slovakia</option>
+                                <option value="+386" data-flag="si">+386 🇸🇮 Slovenia</option>
+                                <option value="+27" data-flag="za">+27 🇿🇦 South Africa</option>
+                                <option value="+34" data-flag="es">+34 🇪🇸 Spain</option>
+                                <option value="+94" data-flag="lk">+94 🇱🇰 Sri Lanka</option>
+                                <option value="+46" data-flag="se">+46 🇸🇪 Sweden</option>
+                                <option value="+41" data-flag="ch">+41 🇨🇭 Switzerland</option>
+                                <option value="+886" data-flag="tw">+886 🇹🇼 Taiwan</option>
+                                <option value="+66" data-flag="th">+66 🇹🇭 Thailand</option>
+                                <option value="+216" data-flag="tn">+216 🇹🇳 Tunisia</option>
+                                <option value="+44" data-flag="gb">+44 🇬🇧 United Kingdom</option>
+                                <option value="+380" data-flag="ua">+380 🇺🇦 Ukraine</option>
+                                <option value="+971" data-flag="ae">+971 🇦🇪 UAE</option>
+                                <option value="+598" data-flag="uy">+598 🇺🇾 Uruguay</option>
+                                <option value="+998" data-flag="uz">+998 🇺🇿 Uzbekistan</option>
+                                <option value="+58" data-flag="ve">+58 🇻🇪 Venezuela</option>
+                                <option value="+84" data-flag="vn">+84 🇻🇳</option>
+                                <option value="+967" data-flag="ye">+967 🇾🇪</option>
+                            </select>
+                            <input type="tel" class="form-control phone-input" id="landlordPhone" placeholder="555-555-5555">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-envelope form-icon"></i>
+                            Email
+                        </label>
+                        <input type="email" class="form-control" id="landlordEmail" placeholder="Your Email Address">
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary btn-lg" onclick="nextStep(1)">
+                            Next <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Property Details -->
+            <div class="step" id="step2" style="display: none;">
+                <div class="step-indicator">
+                    <div class="step-number">1</div>
+                    <div class="step-number active">2</div>
+                    <div class="step-number">3</div>
+                </div>
+                
+                <h1 class="step-title">Property Details</h1>
+                <p class="step-description">Enter information about the rental property and tenancy period.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-building form-icon"></i>
+                            Property Address
+                        </label>
+                        <input type="text" class="form-control" id="propertyAddress" placeholder="Rental Property Address">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-currency-dollar form-icon"></i>
+                            Monthly Rent
+                            <div class="form-check ms-2">
+                                <input class="form-check-input" type="checkbox" id="skipRent">
+                                <label class="form-check-label" for="skipRent">
+                                    Skip rent amount
+                                </label>
+                            </div>
+                        </label>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="monthlyRent" placeholder="Monthly Rent Amount">
+                                <select class="form-select" style="max-width: 80px" id="rentCurrency">
+                                    <option value="C$" selected>CAD C$</option>
+                                    <option value="$">USD $</option>
+                                    <option value="€">EUR €</option>
+                                    <option value="£">GBP £</option>
+                                    <option value="¥">JPY ¥</option>
+                                    <option value="₺">TRY ₺</option>
+                                    <option value="₹">INR ₹</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-range form-icon"></i>
+                            Tenancy Period
+                        </label>
+                        <div class="d-flex gap-2">
+                            <input type="number" class="form-control" id="tenancyValue" min="1" placeholder="Duration" required>
+                            <select class="form-select" id="tenancyUnit" style="width: auto">
+                                <option value="months">Months</option>
+                                <option value="years">Years</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary btn-lg" onclick="previousStep(2)">
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary btn-lg" onclick="nextStep(2)">
+                            Next <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Tenant Performance -->
+            <div class="step" id="step3" style="display: none;">
+                <div class="step-indicator">
+                    <div class="step-number">1</div>
+                    <div class="step-number">2</div>
+                    <div class="step-number active">3</div>
+                </div>
+                
+                <h1 class="step-title">Tenant Performance</h1>
+                <p class="step-description">Evaluate the tenant's performance during their stay.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-credit-card form-icon"></i>
+                            Payment History
+                        </label>
+                        <select class="form-select" id="paymentHistory" aria-label="Select Payment History">
+                            <option value="onTime" selected>Excellent - Always on time</option>
+                            <option value="occasionallyLate">Good - Occasionally late with notice</option>
+                            <option value="sometimesLate">Fair - Sometimes late</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-tools form-icon"></i>
+                            Property Maintenance
+                        </label>
+                        <select class="form-select" id="propertyCondition" aria-label="Select Property Condition">
+                            <option value="excellent" selected>Excellent condition</option>
+                            <option value="good">Good condition</option>
+                            <option value="acceptable">Acceptable condition</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-box-arrow-right form-icon"></i>
+                            Move-out Condition
+                        </label>
+                        <select class="form-select" id="moveOutCondition" aria-label="Select Move-out Condition">
+                            <option value="veryGood" selected>Very good - only standard cleaning</option>
+                            <option value="good">Good - minor repairs needed</option>
+                            <option value="acceptable">Acceptable - some repairs needed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-people form-icon"></i>
+                            Neighbor Relations
+                        </label>
+                        <select class="form-select" id="neighborRelations" aria-label="Select Neighbor Relations">
+                            <option value="excellent" selected>No complaints whatsoever</option>
+                            <option value="veryGood">No formal complaints</option>
+                            <option value="good">One minor complaint, resolved immediately</option>
+                            <option value="fair">Few minor complaints, all resolved</option>
+                            <option value="mixed">Occasional noise complaints, addressed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-hand-thumbs-up form-icon"></i>
+                            Would you rent to this tenant again?
+                        </label>
+                        <select class="form-select" id="wouldRentAgain" aria-label="Select Future Rental Consideration">
+                            <option value="definitely" selected>Definitely - Outstanding tenant</option>
+                            <option value="yes">Yes - Good tenant</option>
+                            <option value="maybe">Maybe - With conditions</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary btn-lg" onclick="previousStep(3)">
+                            <i class="bi bi-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary btn-lg" onclick="generateReference()">
+                            Generate Reference <i class="bi bi-file-text ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Reference -->
+            <div class="step" id="result" style="display: none;">
+                <div class="header-actions d-flex align-items-center justify-content-between mb-4">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="previousStep(3)">
+                        <i class="bi bi-arrow-left"></i> Back to Edit
+                    </button>
+                    <h1 class="step-title mb-0">Generated Reference</h1>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="enableReferenceEditing()">
+                            Edit Text <i class="bi bi-pencil ms-1"></i>
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard()">
+                            Copy Text <i class="bi bi-clipboard ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="referenceOutput" class="p-4 bg-light rounded"></div>
+                
+                <div class="navigation-buttons mt-auto">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-outline-primary" onclick="switchTemplate()">
+                            Try Different Template <i class="bi bi-shuffle ms-2"></i>
+                        </button>
+                        <button class="btn btn-primary" onclick="generatePDF()">
+                            Share as PDF <i class="bi bi-share ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

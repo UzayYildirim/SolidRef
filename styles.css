@@ -1,0 +1,312 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* Design system */
+:root {
+    --primary-blue: #007AFF;
+    --danger-red: #FF3B30;
+    --success-green: #34C759;
+    --neutral-gray: #8E8E93;
+    --light-gray: #F2F2F7;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --border-radius: 10px;
+    --system-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Update base styles */
+body {
+    font-family: var(--system-font);
+    background-color: var(--light-gray);
+    color: #000;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 800px;
+}
+
+h1 {
+    color: #2c3e50;
+    font-weight: 300;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+/* Form controls */
+.form-control, .form-select {
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    padding: 12px 16px;
+    font-size: 17px;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* Button styles */
+.btn {
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 17px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0066d6;
+    transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+    border-color: var(--ios-border);
+    color: var(--ios-blue);
+}
+
+/* Cards and containers */
+.step {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+/* Progress bar */
+.progress {
+    height: 3px;
+    background-color: var(--light-gray);
+    border-radius: 0;
+}
+
+.progress-bar {
+    background-color: var(--primary-blue);
+}
+
+/* Form labels */
+.form-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #000;
+    margin-bottom: 8px;
+}
+
+/* Checkboxes */
+.form-check-input {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+/* Header */
+.floating-header {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    color: #000;
+}
+
+/* Reference output */
+#referenceOutput {
+    font-family: var(--system-font);
+    background: white;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Alerts */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+    background: rgba(255, 204, 0, 0.1);
+    color: #856404;
+    padding: 12px 16px;
+}
+
+/* Navigation buttons */
+.navigation-buttons {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Step indicators */
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: var(--light-gray);
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.step-number.active {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+/* Button animations */
+@keyframes buttonPress {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+}
+
+.btn:active {
+    animation: buttonPress 0.2s ease;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-invalid:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Loading animation styles */
+.loading-container {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-text {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.loading-subtext {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.spinner-grow {
+    width: 3rem;
+    height: 3rem;
+    background-color: #ff5722;
+}
+
+/* Add animation for text */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loading-text, .loading-subtext {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.loading-subtext {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+/* Add/update these styles */
+.invite-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.invite-header i {
+    font-size: 3rem;
+    color: #ff5722;
+    margin-bottom: 1rem;
+}
+
+.invite-header h1 {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.invite-body {
+    text-align: center;
+}
+
+.invite-body h2 {
+    color: #ff5722;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.invite-body p {
+    color: #666;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.invite-body .subtitle {
+    font-size: 1rem;
+    color: #888;
+    font-weight: 300;
+}
+
+#startButton {
+    background: #ff5722;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#startButton:hover {
+    background: #f4511e;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 87, 34, 0.3);
+} 
