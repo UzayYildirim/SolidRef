@@ -1,6 +1,6 @@
 # SolidRef Rental Reference Generator
 
-SolidRef is a project I quickly developed while searching for a new place. When I reached out to my previous landlords, they all mentioned being too busy to write a letter for me. As a result, I created SolidRef to be as straightforward as possible. I deployed it at https://uzay.me/SolidRef and shared the link with them. It is a practical tool for tenants to share with their landlords for quicker letter generation.
+SolidRef is a project I quickly developed while searching for a new place. When I reached out to my previous landlords, they all mentioned being too busy to write a letter for me. As a result, I created SolidRef to be as straightforward as possible. I deployed it at my personal website and shared the link with them. It is a practical tool for tenants to share with their landlords for quicker letter generation.
 
 ## About the App
 SolidRef Rental Reference Generator is a web-based, mobile-first tool designed to help landlords create professional reference letters for their tenants. It offers a multi-step form interface, multiple letter templates, and PDF generation capabilities. The tool is mobile-responsive, ensuring ease of use across devices, and includes share functionality, allowing landlords to easily share the generated reference letter.
@@ -31,7 +31,14 @@ Recommended hosts:
 ### Requirements
 - Modern web browser
 - Internet connection (for CDN resources)
-- No backend required
-- No database required
 
 No sensitive data is stored, as all processing occurs client-side. PDF generation is done locally, so no information is transmitted or stored externally.
+
+# Screenshots Gallery
+![Landing Page](screenshots/solidref-landing.png)
+![Screenshot 1](screenshots/solidref-1.jpg)
+![Screenshot 2](screenshots/solidref-2.jpg)
+![Screenshot 3](screenshots/solidref-3.jpg)
+![Screenshot 4](screenshots/solidref-4.jpeg)
+![Screenshot 5](screenshots/solidref-5.jpg)
+![Share Feature](screenshots/solidref-share.jpg)
